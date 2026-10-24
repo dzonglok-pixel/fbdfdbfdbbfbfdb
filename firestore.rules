@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // 1. Уникальные никнеймы: /usernames/{usernameLower}
+    // =========================================================================
+    // Любой посетитель может проверить, свободен ли ник при регистрации.
+    // Зарегистрировать ник может только автор своего uid.
+    // Изменение и удаление запрещены.
+    match /usernames/{usernameLower} {
+      allow read: if true;
+      allow create: if request.auth != null 
+                    && request.resource.data.uid == request.auth.uid
+                    && !exists(/databases/$(database)/documents/usernames/$(usernameLower));
+      allow update, delete: if false;
+    }
+
+    // =========================================================================
+    // 2. Профили пользователей: /users/{userId}
+    // =========================================================================
+    // Пользователь может читать и создавать только свой личный профиль.
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update, delete: if false;
+    }
+
+    // =========================================================================
+    // 3. Заказы: /orders/{orderId}
+    // =========================================================================
+    // - Чтение: только владелец заказа (userId == auth.uid).
+    // - Создание: только с начальным статусом "pending" и флагом reviewed == false.
+    // - ВАЖНО: Клиент НЕ МОЖЕТ изменить status на "completed"! Это делает только админ.
+    // - Обновление: разрешено только для проставления флага reviewed = true при отправке отзыва,
+    //   при этом статус, сумма, игра и пользователь не могут быть изменены.
+    match /orders/{orderId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      allow create: if request.auth != null 
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.status == "pending"
+                    && request.resource.data.reviewed == false;
+
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    // Запрещаем клиенту изменять статус заказа
+                    && request.resource.data.status == resource.data.status
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.orderId == resource.data.orderId
+                    // Разрешаем только смену флага reviewed на true
+                    && request.resource.data.reviewed == true;
+
+      allow delete: if false;
+    }
+
+    // =========================================================================
+    // 4. Отзывы: /reviews/{reviewId}
+    // =========================================================================
+    // - Чтение: открыто для всех посетителей витрины (публичные отзывы).
+    // - Создание: разрешено ТОЛЬКО если:
+    //   1. Пользователь залогинен.
+    //   2. Отзыв оформлен на его собственный uid.
+    //   3. Заказ существует, принадлежит этому же пользователю и его статус "completed".
+    //   4. Рейтинг от 1 до 5 звезд.
+    // - Редактирование и удаление чужих отзывов заблокированы.
+    match /reviews/{reviewId} {
+      allow read: if true;
+
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.rating >= 1 
+                    && request.resource.data.rating <= 5
+                    && exists(/databases/$(database)/documents/orders/$(request.resource.data.orderId))
+                    && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.status == "completed"
+                    && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.userId == request.auth.uid;
+
+      allow update, delete: if false;
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "NetBanaSHOP — Безопасный маркет виртов",
+  "description": "Официальный портал NetBanaSHOP в палитре Minimal Ruby: выгодный калькулятор виртов Black Russia (курс 1кк = 80 ₽, все 90+ серверов) и голды Standoff 2 с защитой от бана.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

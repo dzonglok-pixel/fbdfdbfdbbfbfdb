@@ -1,0 +1,246 @@
+<!-- ============================================================================== -->
+<!-- markup-templates.html — Готовая HTML-разметка модальных окон и блоков        -->
+<!-- Стилизовано современными утилитами Tailwind CSS                              -->
+<!-- ============================================================================== -->
+
+<!-- 1. ШАПКА САЙТА: Блок авторизации (вставляется в <header>) -->
+<div id="auth-header-container" class="flex items-center gap-3">
+  <!-- Состояние 1: Не залогинен -->
+  <div id="guest-zone" class="flex items-center gap-2">
+    <button 
+      id="btn-open-login" 
+      onclick="openModal('modal-login')"
+      class="px-3.5 py-1.5 text-xs font-semibold text-slate-200 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-slate-800 rounded-lg transition-all"
+    >
+      Войти
+    </button>
+    <button 
+      id="btn-open-register" 
+      onclick="openModal('modal-register')"
+      class="px-3.5 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-lg shadow-sm shadow-rose-950 transition-all"
+    >
+      Регистрация
+    </button>
+  </div>
+
+  <!-- Состояние 2: Залогинен (по умолчанию скрыт d-none / hidden) -->
+  <div id="user-zone" class="hidden items-center gap-3">
+    <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-900/90 border border-rose-900/40 rounded-lg">
+      <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+      <span class="text-xs font-medium text-slate-400">Игрок:</span>
+      <span id="user-display-nickname" class="text-xs font-bold text-rose-400 font-mono">Player</span>
+    </div>
+    <button 
+      id="btn-logout" 
+      onclick="handleUserLogout()"
+      class="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-rose-400 hover:bg-rose-950/20 border border-transparent hover:border-rose-900/40 rounded-lg transition-all"
+    >
+      Выйти
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================================== -->
+<!-- 2. МОДАЛЬНОЕ ОКНО: ВХОД (Никнейм + Пароль)                                     -->
+<!-- ============================================================================== -->
+<div id="modal-login" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+  <div class="relative w-full max-w-md bg-[#0D111A] border border-slate-800 rounded-2xl p-6 shadow-2xl">
+    <!-- Кнопка закрытия -->
+    <button onclick="closeModal('modal-login')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
+
+    <div class="mb-5 text-center">
+      <h3 class="text-xl font-black text-white tracking-wide">Вход в NetBana</h3>
+      <p class="text-xs text-slate-400 mt-1">Авторизуйтесь по никнейму для покупок и отзывов</p>
+    </div>
+
+    <!-- Сообщение об ошибке -->
+    <div id="login-error" class="hidden mb-4 p-3 bg-rose-950/40 border border-rose-800/50 rounded-lg text-xs text-rose-300"></div>
+
+    <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Ваш никнейм</label>
+        <input 
+          type="text" 
+          id="login-nickname" 
+          required 
+          placeholder="Например: Artem_Miller"
+          class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 focus:border-rose-500 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none transition-colors"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Пароль</label>
+        <input 
+          type="password" 
+          id="login-password" 
+          required 
+          placeholder="••••••••"
+          class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 focus:border-rose-500 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none transition-colors"
+        />
+      </div>
+
+      <button 
+        type="submit" 
+        id="btn-login-submit"
+        class="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm rounded-lg transition-all shadow-lg shadow-rose-950/50"
+      >
+        Войти в аккаунт
+      </button>
+
+      <div class="text-center text-xs text-slate-400 mt-3">
+        Ещё нет аккаунта? 
+        <button type="button" onclick="switchModals('modal-login', 'modal-register')" class="text-rose-400 hover:underline font-semibold ml-1">
+          Зарегистрироваться
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================================== -->
+<!-- 3. МОДАЛЬНОЕ ОКНО: РЕГИСТРАЦИЯ (Никнейм + Пароль)                               -->
+<!-- ============================================================================== -->
+<div id="modal-register" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+  <div class="relative w-full max-w-md bg-[#0D111A] border border-slate-800 rounded-2xl p-6 shadow-2xl">
+    <!-- Кнопка закрытия -->
+    <button onclick="closeModal('modal-register')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
+
+    <div class="mb-5 text-center">
+      <h3 class="text-xl font-black text-white tracking-wide">Быстрая регистрация</h3>
+      <p class="text-xs text-slate-400 mt-1">Без почты и спама — только никнейм и пароль</p>
+    </div>
+
+    <!-- Сообщение об ошибке -->
+    <div id="register-error" class="hidden mb-4 p-3 bg-rose-950/40 border border-rose-800/50 rounded-lg text-xs text-rose-300"></div>
+
+    <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Придумайте никнейм</label>
+        <input 
+          type="text" 
+          id="reg-nickname" 
+          required 
+          minlength="3" 
+          maxlength="20"
+          placeholder="Латинские буквы, цифры и _"
+          class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 focus:border-rose-500 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none transition-colors"
+        />
+        <span class="text-[11px] text-slate-500 mt-1 block">От 3 до 20 символов. Никнейм уникален.</span>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Придумайте пароль</label>
+        <input 
+          type="password" 
+          id="reg-password" 
+          required 
+          minlength="6" 
+          placeholder="Минимум 6 символов"
+          class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 focus:border-rose-500 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none transition-colors"
+        />
+      </div>
+
+      <button 
+        type="submit" 
+        id="btn-register-submit"
+        class="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm rounded-lg transition-all shadow-lg shadow-rose-950/50"
+      >
+        Создать аккаунт
+      </button>
+
+      <div class="text-center text-xs text-slate-400 mt-3">
+        Уже есть аккаунт? 
+        <button type="button" onclick="switchModals('modal-register', 'modal-login')" class="text-rose-400 hover:underline font-semibold ml-1">
+          Войти
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================================== -->
+<!-- 4. БЛОК СИСТЕМЫ ОТЗЫВОВ: Форма отзыва (только для завершенных заказов)           -->
+<!-- ============================================================================== -->
+<div id="review-submission-container" class="mt-8">
+  <!-- Состояние А: Пользователь не залогинен -->
+  <div id="review-guest-banner" class="p-6 bg-slate-900/60 border border-slate-800 rounded-xl text-center">
+    <p class="text-sm text-slate-300 font-medium">Чтобы оставить отзыв, войдите в аккаунт.</p>
+    <button onclick="openModal('modal-login')" class="mt-3 px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg transition-all">
+      Войти для отзыва
+    </button>
+  </div>
+
+  <!-- Состояние Б: Пользователь залогинен, но нет завершенных заказов без отзыва -->
+  <div id="review-locked-banner" class="hidden p-6 bg-slate-900/60 border border-rose-950/40 rounded-xl text-center">
+    <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-rose-950/60 text-rose-400 mb-2">🔒</div>
+    <h4 class="text-sm font-bold text-white">Сначала совершите покупку</h4>
+    <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+      Отзывы на сайте могут оставлять только реальные клиенты после успешного завершения заказа администратором (статус: completed).
+    </p>
+  </div>
+
+  <!-- Состояние В: Есть доступный выполненный заказ! Форма отзыва -->
+  <div id="review-form-wrapper" class="hidden p-6 bg-[#0D111A] border border-rose-800/40 rounded-xl shadow-xl">
+    <div class="mb-4">
+      <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded">
+        ✓ Заказ подтвержден
+      </span>
+      <h4 class="text-base font-extrabold text-white mt-1">Оставьте отзыв о вашей покупке</h4>
+      <p class="text-xs text-slate-400">Поделитесь скоростью выдачи и впечатлением от сделки</p>
+    </div>
+
+    <form id="form-review-submit" onsubmit="handleReviewSubmit(event)" class="space-y-4">
+      <!-- Выбор заказа (если несколько завершенных) -->
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Номер вашего завершенного заказа</label>
+        <select id="review-order-select" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white">
+          <!-- Заполняется динамически через JS -->
+        </select>
+      </div>
+
+      <!-- Выбор рейтинга (1-5 звезд) -->
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Ваша оценка</label>
+        <div class="flex items-center gap-3">
+          <select id="review-rating" class="px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-yellow-400 font-bold">
+            <option value="5">⭐⭐⭐⭐⭐ 5 из 5 (Отлично)</option>
+            <option value="4">⭐⭐⭐⭐ 4 из 5 (Хорошо)</option>
+            <option value="3">⭐⭐⭐ 3 из 5 (Нормально)</option>
+            <option value="2">⭐⭐ 2 из 5 (Есть замечания)</option>
+            <option value="1">⭐ 1 из 5 (Плохо)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Текст отзыва -->
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">Текст отзыва</label>
+        <textarea 
+          id="review-text" 
+          rows="3" 
+          required 
+          placeholder="Напишите честный отзыв: насколько быстро пришли вирты, какой способ использовали..."
+          class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 focus:border-rose-500 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none"
+        ></textarea>
+      </div>
+
+      <button 
+        type="submit" 
+        id="btn-submit-review"
+        class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg transition-all"
+      >
+        Опубликовать проверенный отзыв
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================================== -->
+<!-- 5. СПИСОК ПРОВЕРЕННЫХ ОТЗЫВОВ ИЗ FIRESTORE                                       -->
+<!-- ============================================================================== -->
+<div id="reviews-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+  <!-- Карточки отзывов рендерятся динамически из коллекции reviews -->
+  <div class="p-4 bg-slate-900/40 border border-slate-800/80 rounded-xl animate-pulse text-xs text-slate-500 text-center py-8 col-span-full">
+    Загрузка проверенных отзывов клиентов...
+  </div>
+</div>
